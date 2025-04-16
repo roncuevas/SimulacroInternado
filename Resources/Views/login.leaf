@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Selección de Plazas</title>
+    <script src="simulacro.js"></script>
+  </head>
+  <body onload="login()">
+    <h1>Bienvenido</h1>
+    <p id="status">Conectando...</p>
+    <p id="students_count"></p>
+    <p id="global_position"></p>
+    <p id="position"></p>
+    <div id="spots"></div>
+  </body>
+</html>
