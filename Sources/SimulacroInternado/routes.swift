@@ -1,7 +1,9 @@
 import Vapor
 
 func routes(_ app: Application) throws {
+    try app.register(collection: InternshipController(app: app))
     let queueManager = app.storage[InternshipQueueManagerKey.self]!
+    // Get current hostname and port with: app.http.server.shared.localAddress
 
     app.get("example") { req async throws in
         try await req.view.render("index", ["title": "Hello Vapor!"])
@@ -14,29 +16,6 @@ func routes(_ app: Application) throws {
     // Mostrar la vista Leaf
     app.get { req async throws in
         return try await req.view.render("login")
-    }
-
-    // WebSocket para unirse a la fila
-    app.webSocket("queue") { req, ws in
-        guard let boleta = req.query[String.self, at: "boleta"] else {
-            ws.close(promise: nil)
-            return
-        }
-        guard queueManager.canJoin(studentID: boleta) else {
-            queueManager.sendError("No estas registrado", ws: ws)
-            return
-        }
-        guard queueManager.canPick(studentID: boleta) else {
-            queueManager.sendError("Ya seleccionaste plaza", ws: ws)
-            return
-        }
-        queueManager.addToQueue(studentID: boleta, ws: ws)
-        queueManager.updateAll()
-
-        ws.onClose.whenComplete { _ in
-            queueManager.removeFromConnections(studentID: boleta)
-            queueManager.updateAll()
-        }
     }
 
     // Endpoint para seleccionar una plaza

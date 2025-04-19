@@ -1,6 +1,7 @@
 import Foundation
+import Vapor
 
-struct Spot: Codable, Equatable, Identifiable {
+struct SpotModel: Content {
     var id: String
     var name: String
     var location: String

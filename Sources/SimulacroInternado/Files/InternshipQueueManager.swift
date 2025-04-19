@@ -2,19 +2,20 @@ import Foundation
 import Vapor
 
 final class InternshipQueueManager: @unchecked Sendable {
-    private(set) var students: [Student] = []
-    private(set) var queue: [Student] = []
-    private(set) var spots: [Spot] = []
+    private(set) var students: [StudentModel] = []
+    private(set) var queue: [StudentModel] = []
+    private(set) var spots: [SpotModel] = []
     private var connections: [String: WebSocket] = [:]
-    private var app: Application
+    private let dataProvider: any InternshipDataSource
 
-    init(app: Application, eventLoop: EventLoop) async throws {
-        self.app = app
-        spots = try await Self.loadSpots(app)
-        spots.sort { $0.name > $1.name }
-        queue = try await Self.loadStudents(app)
-        queue.sort { $0.average > $1.average }
-        students = queue
+    init(dataProvider: any InternshipDataSource) async throws {
+        self.dataProvider = dataProvider
+        self.spots = try await dataProvider.fetchSpots()
+        self.students = try await dataProvider.fetchStudents()
+
+        self.spots.sort { $0.name > $1.name }
+        self.students.sort { $0.average > $1.average }
+        self.queue = students
     }
 
     func addToQueue(studentID: String, ws: WebSocket) {
@@ -35,7 +36,7 @@ final class InternshipQueueManager: @unchecked Sendable {
 
     func register(studentID: String, average: Double) {
         if !queue.contains(where: { $0.id == studentID }) {
-            let student = Student(id: studentID, average: average)
+            let student = StudentModel(id: studentID, average: average)
             queue.append(student)
         }
     }
@@ -56,7 +57,6 @@ final class InternshipQueueManager: @unchecked Sendable {
         spots[spotIndex].isTaken = true
         removeFromQueue(studentID: studentID)
         updateAll()
-        // leave(studentID: studentID)
         return true
     }
 
@@ -93,23 +93,5 @@ final class InternshipQueueManager: @unchecked Sendable {
                 }
             }
         }
-    }
-
-    private static func loadSpots(_ app: Application) async throws -> [Spot] {
-        let url = URL(fileURLWithPath: app.directory.workingDirectory)
-            .appendingPathComponent("Resources")
-            .appendingPathComponent("Data")
-            .appendingPathComponent("spots.json")
-        let data = try Data(contentsOf: url)
-        return try JSONDecoder().decode([Spot].self, from: data)
-    }
-
-    private static func loadStudents(_ app: Application) async throws -> [Student] {
-        let url = URL(fileURLWithPath: app.directory.workingDirectory)
-            .appendingPathComponent("Resources")
-            .appendingPathComponent("Data")
-            .appendingPathComponent("students.json")
-        let data = try Data(contentsOf: url)
-        return try JSONDecoder().decode([Student].self, from: data)
     }
 }

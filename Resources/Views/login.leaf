@@ -1,15 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Selección de Plazas</title>
+
+    <!-- UIkit CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/uikit@3.23.6/dist/css/uikit.min.css"
+    />
+
+    <!-- UIkit JS -->
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.23.6/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.23.6/dist/js/uikit-icons.min.js"></script>
+
     <script src="simulacro.js"></script>
   </head>
-  <body onload="login()">
-    <h1>Bienvenido</h1>
-    <p id="status">Conectando...</p>
-    <p id="students_count"></p>
-    <p id="global_position"></p>
-    <p id="position"></p>
-    <div id="spots"></div>
+  <body onload="login()" class="uk-background-muted uk-height-viewport">
+
+    <div class="uk-container uk-flex uk-flex-center uk-flex-middle uk-height-1-1">
+      <div class="uk-card uk-card-default uk-card-hover uk-width-large uk-box-shadow-large uk-padding uk-animation-fade">
+        <h2 class="uk-card-title uk-text-center">Selección de Plazas</h2>
+
+        <div class="uk-margin-small">
+          <p id="status" class="uk-text-primary">Conectando...</p>
+        </div>
+
+        <div class="uk-margin-small">
+          <p id="students_count" class="uk-text-meta"></p>
+          <p id="global_position" class="uk-text-lead"></p>
+          <p id="position" class="uk-text-lead"></p>
+        </div>
+
+        <hr class="uk-divider-icon" />
+
+        <div id="spots" class="uk-child-width-1-2 uk-grid-small uk-grid-match" uk-grid></div>
+      </div>
+    </div>
+
   </body>
 </html>

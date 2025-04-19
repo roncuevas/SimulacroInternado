@@ -1,21 +1,22 @@
 let boleta = "";
 let selectedSpotId = null;
-
-const statusElement = document.getElementById("status");
-const globalPositionElement = document.getElementById("global_position");
-const positionElement = document.getElementById("position");
-const spotsElement = document.getElementById("spots");
-const confirmationDiv = document.getElementById("confirmation");
+let statusElement = null;
+let globalPositionElement = null;
+let positionElement = null;
+let spotsElement = null;
+let confirmationDiv = null;
+let ws = null;
 
 function login() {
+    getElements();
     boleta = prompt("Ingresa tu boleta:");
-    const ws = new WebSocket(`ws://localhost:8080/queue?boleta=${boleta}`);
+    ws = new WebSocket(`ws://${window.location.host}/internship/queue?boleta=${boleta}`);
 
     ws.onmessage = ({ data }) => {
         const { error, globalPosition, studentsCount, actualPosition, remaining, spots } = JSON.parse(data);
 
         if (error) {
-            updateStatus(error);
+            showError(error);
             return;
         }
 
@@ -27,6 +28,14 @@ function login() {
             actualPosition === 1 ? "Es tu turno, selecciona una plaza." : "Esperando turno..."
         );
     };
+}
+
+function getElements() {
+    statusElement = document.getElementById("status");
+    globalPositionElement = document.getElementById("global_position");
+    positionElement = document.getElementById("position");
+    spotsElement = document.getElementById("spots");
+    confirmationDiv = document.getElementById("confirmation");
 }
 
 function renderSpots(spots) {
@@ -69,6 +78,10 @@ async function confirmSelection() {
     } catch {
         alert("Error: La plaza ya fue ocupada.");
     }
+}
+
+function showError(message) {
+    window.alert(message);
 }
 
 function updateStatus(message) {
