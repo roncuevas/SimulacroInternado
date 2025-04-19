@@ -1,7 +1,7 @@
 import Vapor
 
 func routes(_ app: Application) throws {
-    try app.register(collection: InternshipController(app: app))
+    try app.register(collection: InternshipController())
     let queueManager = app.storage[InternshipQueueManagerKey.self]!
     // Get current hostname and port with: app.http.server.shared.localAddress
 
