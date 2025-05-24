@@ -1,7 +1,6 @@
-import Foundation
 import Vapor
 
-struct SpotModel: Content {
+struct QueueSpotModel: Content {
     var id: String
     var name: String
     var location: String

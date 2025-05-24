@@ -8,13 +8,24 @@ struct InternshipController: RouteCollection {
         internship.group("admin") { group in
 //            group.post(use: createHandler)
         }
+        internship.webSocket(["queue"], shouldUpgrade: shouldUpgrade, onUpgrade: queue)
+    }
 
-        internship.webSocket("queue", onUpgrade: queue)
+    func shouldUpgrade(req: Request) async throws -> HTTPHeaders? {
+        return ["token": UUID().uuidString]
     }
 
     func queue(req: Request, ws: WebSocket) async {
         let queueManager = req.application.storage[InternshipQueueManagerKey.self]!
-        guard let boleta = req.query[String.self, at: "boleta"] else {
+        struct QueueQuery: Content {
+            let boleta: Int
+        }
+        let boleta: String? = req.query["boleta"]
+//        let boleta2 = req.query[String.self, at: "boleta"]
+//        let boleta3 = try? req.query.decode(QueueQuery.self)
+//        let boleta4: String? = req.query["boleta"]
+
+        guard let boleta else {
             ws.close(promise: nil)
             return
         }

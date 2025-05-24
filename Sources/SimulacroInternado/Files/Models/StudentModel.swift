@@ -1,4 +1,3 @@
-import Foundation
 import Vapor
 
 struct StudentModel: Content {

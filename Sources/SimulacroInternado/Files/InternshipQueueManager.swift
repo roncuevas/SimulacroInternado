@@ -4,7 +4,7 @@ import Vapor
 final class InternshipQueueManager: @unchecked Sendable {
     private(set) var students: [StudentModel] = []
     private(set) var queue: [StudentModel] = []
-    private(set) var spots: [SpotModel] = []
+    private(set) var spots: [QueueSpotModel] = []
     private var connections: [String: WebSocket] = [:]
     private let dataProvider: any InternshipDataSource
 
@@ -61,37 +61,32 @@ final class InternshipQueueManager: @unchecked Sendable {
     }
 
     func sendError(_ text: String, ws: WebSocket) {
-        let payload: [String: Any] = ["error": text]
-
-        if let json = try? JSONSerialization.data(withJSONObject: payload),
-           let str = String(data: json, encoding: .utf8) {
-            ws.send(str)
-        }
+        let response = QueueResponseModel(data: nil, error: text)
+        encodeAndSend(response: response, ws: ws)
     }
 
-    func getSpots(index: Int) -> [[String: String]] {
-        if index == 0 {
-            return spots.filter { !$0.isTaken }.map { ["id": $0.id, "name": $0.name, "location": $0.location] }
-        }
-        return spots.filter { !$0.isTaken }.map { ["name": $0.name, "location": $0.location] }
+    func getSpots(index: Int) -> [QueueSpotModel] {
+        return spots.filter { !$0.isTaken }
     }
 
     func updateAll() {
         for (id, ws) in connections {
             if let index = queue.firstIndex(where: { $0.id == id }) {
-                let payload: [String: Any] = [
-                    "globalPosition": getGeneralPosition(studentID: id),
-                    "studentsCount": students.count,
-                    "actualPosition": index + 1,
-                    "remaining": index,
-                    "spots": getSpots(index: index)
-                ]
-
-                if let json = try? JSONSerialization.data(withJSONObject: payload),
-                   let str = String(data: json, encoding: .utf8) {
-                    ws.send(str)
-                }
+                let data = QueueDataModel(globalPosition: getGeneralPosition(studentID: id),
+                                          studentsCount: students.count,
+                                          actualPosition: index + 1,
+                                          remaining: index,
+                                          spots: getSpots(index: index))
+                let response = QueueResponseModel(data: data, error: nil)
+                encodeAndSend(response: response, ws: ws)
             }
+        }
+    }
+
+    func encodeAndSend(response: QueueResponseModel, ws: WebSocket) {
+        if let encoded = try? JSONEncoder().encode(response),
+            let json = String(data: encoded, encoding: .utf8) {
+            ws.send(json)
         }
     }
 }

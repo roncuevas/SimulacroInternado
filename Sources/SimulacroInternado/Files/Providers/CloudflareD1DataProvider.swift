@@ -7,8 +7,8 @@ struct CloudflareD1DataProvider: InternshipDataSource {
     let databaseID: String
     let authToken: String
 
-    func fetchSpots() async throws -> [SpotModel] {
-        try await query(sql: "SELECT * FROM spots;", params: [], type: [SpotModel].self)
+    func fetchSpots() async throws -> [QueueSpotModel] {
+        try await query(sql: "SELECT * FROM spots;", params: [], type: [QueueSpotModel].self)
     }
 
     func fetchStudents() async throws -> [StudentModel] {
