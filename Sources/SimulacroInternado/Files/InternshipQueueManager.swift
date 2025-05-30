@@ -72,11 +72,14 @@ final class InternshipQueueManager: @unchecked Sendable {
     func updateAll() {
         for (id, ws) in connections {
             if let index = queue.firstIndex(where: { $0.id == id }) {
-                let data = QueueDataModel(globalPosition: getGeneralPosition(studentID: id),
-                                          studentsCount: students.count,
-                                          actualPosition: index + 1,
-                                          remaining: index,
-                                          spots: getSpots(index: index))
+                let data = QueueDataModel(
+                    studentID: id,
+                    globalPosition: getGeneralPosition(studentID: id),
+                    studentsCount: students.count,
+                    actualPosition: index + 1,
+                    remaining: index,
+                    startTime: Date.now.timeIntervalSince1970,
+                    spots: getSpots(index: index))
                 let response = QueueResponseModel(data: data, error: nil)
                 encodeAndSend(response: response, ws: ws)
             }
@@ -85,7 +88,7 @@ final class InternshipQueueManager: @unchecked Sendable {
 
     func encodeAndSend(response: QueueResponseModel, ws: WebSocket) {
         if let encoded = try? JSONEncoder().encode(response),
-            let json = String(data: encoded, encoding: .utf8) {
+           let json = String(data: encoded, encoding: .utf8) {
             ws.send(json)
         }
     }
