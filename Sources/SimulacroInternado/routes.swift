@@ -19,22 +19,20 @@ func routes(_ app: Application) throws {
     }
 
     // Endpoint para seleccionar una plaza
-    app.post("select", ":spotID") { req async throws -> HTTPStatus in
-        guard let spotIDString = req.parameters.get("spotID"),
-              let spotID = UUID(uuidString: spotIDString)?.uuidString else {
-            throw Abort(.badRequest)
-        }
+//    app.post("select", ":spotID") { req async throws -> HTTPStatus in
+    app.post("select") { req async throws -> HTTPStatus in
+//        guard let spotIDString = req.parameters.get("spotID"),
+//              let spotID = UUID(uuidString: spotIDString)?.uuidString else {
+//            throw Abort(.badRequest)÷
+//        }
 
         struct SelectionRequest: Content {
             let boleta: String
+            let spotID: String
         }
 
-        let selection = try req.content.decode(SelectionRequest.self)
-
-        if queueManager.selectSpot(for: selection.boleta, spotID: spotID) {
-            return .ok
-        } else {
-            return .conflict
-        }
+        let request = try req.content.decode(SelectionRequest.self)
+        try queueManager.selectSpot(for: request.boleta, spotID: request.spotID)
+        return .ok
     }
 }

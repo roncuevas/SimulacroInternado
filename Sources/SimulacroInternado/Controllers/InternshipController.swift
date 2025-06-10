@@ -31,10 +31,13 @@ struct InternshipController: RouteCollection {
         }
         guard queueManager.canJoin(studentID: boleta) else {
             queueManager.sendError("No estas registrado", ws: ws)
+            ws.close(promise: nil)
             return
         }
         guard queueManager.canPick(studentID: boleta) else {
-            queueManager.sendError("Ya seleccionaste plaza", ws: ws)
+            let spot = queueManager.getSelectedStudent(studentID: boleta)?.spot ?? "plaza"
+            queueManager.sendError("Ya seleccionaste \(spot)", ws: ws)
+            ws.close(promise: nil)
             return
         }
         queueManager.addToQueue(studentID: boleta, ws: ws)
@@ -45,6 +48,4 @@ struct InternshipController: RouteCollection {
             queueManager.updateAll()
         }
     }
-
-
 }
